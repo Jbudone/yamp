@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onMount } from 'svelte';
-import { app, appState } from '$lib';
+import { app, appState } from '$lib/index.svelte';
 
 onMount(async () => {
     // Player page: initialize the player

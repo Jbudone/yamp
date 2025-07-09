@@ -3,7 +3,7 @@ import "../app.css";
 
 const { children } = $props();
 import { onMount } from 'svelte';
-import { app, appState } from '$lib';
+import { app, appState } from '$lib/index.svelte';
 
 // Initialize the app on mount (client-side only)
 onMount(async () => {
@@ -14,14 +14,14 @@ onMount(async () => {
 
 </script>
 
-{#if $appState.loading}
+{#if appState.loading}
   <div class="loading-overlay">
     <p>Loading application...</p>
   </div>
-{:else if $appState.error}
+{:else if appState.error}
   <div class="error-container">
     <h2>Error initializing application</h2>
-    <p>{$appState.error}</p>
+    <p>{appState.error}</p>
     <button on:click={() => app.initialize()}>Retry</button>
   </div>
 {:else}

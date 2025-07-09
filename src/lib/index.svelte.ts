@@ -1,14 +1,8 @@
 
-import { writable } from 'svelte/store';
-import type { User } from './types';
-
-import { setContext } from 'svelte';
 import config from '$lib/config';
 import Player from '$lib/player';
 
-// FIXME: Look into store vs. runes
-export const userStore = writable<User | null>(null);
-export const appState = writable({
+export const appState = $state({
     initialized: false,
     loading: true,
     error: null
@@ -35,27 +29,23 @@ class App {
 
         try {
             // Set loading state
-            appState.update(state => ({ ...state, loading: true }));
+            appState.loading = true;
 
             // Initialize services, fetch initial data, etc.
             await this.initializeServices();
             await this.loadInitialData();
 
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
             // Mark as initialized
-            appState.update(state => ({ 
-                ...state, 
-                initialized: true,
-                loading: false 
-            }));
+            appState.loading = false;
+            appState.initialized = true;
 
             console.log('Application initialized successfully');
         } catch (error) {
             console.error('Failed to initialize application:', error);
-            appState.update(state => ({ 
-                ...state, 
-                loading: false, 
-                error: error instanceof Error ? error.message : 'Unknown error' 
-            }));
+            appState.loading = false;
+            appState.error = error instanceof Error ? error.message : 'Unknown error' 
         }
     }
 
