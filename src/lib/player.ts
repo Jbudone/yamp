@@ -57,24 +57,26 @@ export default class Player {
         const SIGNING_EXPIRATION = 7200;
 
         let signedURLPath = "";
-        if (this.pathToken && this.pathToken.songId == songId) {
+        const nowSec = Math.floor(Date.now() / 1000);
+        if (this.pathToken && this.pathToken.songId == songId && nowSec < this.pathToken.expires) {
             signedURLPath = this.pathToken.signedURLPath;
         } else {
             // update signed token for song path
+            const expirationTimeSec = nowSec + SIGNING_EXPIRATION;
             const basePath = this.getURLBasePath(songId);
-            const signedToken = await this.signURLPath(securityKey, SIGNING_EXPIRATION, basePath);
+            const signedToken = await this.signURLPath(securityKey, expirationTimeSec, basePath);
             signedURLPath = host + "/" + signedToken;
             this.pathToken.signedURLPath = signedURLPath;
             this.pathToken.songId = songId;
-            this.pathToken.expires = 0; // FIXME; don't forget to take this into consideration in segment fetches (eg. 3 hour long song and token expires in 1 hour)
+            this.pathToken.expires = expirationTimeSec - 3; // Give some leeway for initial transit
         }
 
         return signedURLPath;
     }
 
-    private async signURLPath(securityKey, expirationTime = 3600, signaturePath) {
+    private async signURLPath(securityKey, expirationTimeSec, signaturePath) {
 
-        const expires = Math.floor(new Date() / 1000) + expirationTime;
+        const expires = expirationTimeSec;
         const hashableBase = securityKey + signaturePath + expires + 'token_path=' + signaturePath;
 
         const data = (new TextEncoder()).encode(hashableBase) 
