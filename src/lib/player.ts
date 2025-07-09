@@ -53,8 +53,7 @@ export default class Player {
         const securityKey = config.BUNNYCDN_GET_ACCESS_KEY!;
         const host = config.BUNNYCDN_GET_HOST!;
 
-        // FIXME: hardcoded expiration; think of something reasonable later
-        const SIGNING_EXPIRATION = 7200;
+        const SIGNING_EXPIRATION = 14400; // 4 hours: medium lived token for infrequent re-auth
 
         let signedURLPath = "";
         const nowSec = Math.floor(Date.now() / 1000);
