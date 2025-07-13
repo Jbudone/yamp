@@ -43,12 +43,16 @@
 	},
 	"dependencies": {
 		"@types/express": "^5.0.3",
+		"audiomotion-analyzer": "^4.5.1",
 		"dashjs": "^5.0.3",
 		"drizzle-orm": "^0.40.0",
+		"eventemitter3": "^5.0.1",
 		"express": "^5.1.0",
+		"hyperlist": "^1.0.0",
 		"mysql2": "^3.14.1",
 		"nodemon": "^3.1.10",
 		"postgres": "^3.4.5",
-		"ts-node": "^10.9.2"
+		"ts-node": "^10.9.2",
+		"umbrellajs": "^3.3.3"
 	}
 }

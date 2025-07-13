@@ -3,7 +3,7 @@ import "../app.css";
 
 const { children } = $props();
 import { onMount } from 'svelte';
-import { app, appState } from '$lib/index.svelte';
+import { app, appState } from '$lib/app.svelte';
 
 // Initialize the app on mount (client-side only)
 onMount(async () => {

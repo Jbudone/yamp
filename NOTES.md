@@ -2,19 +2,43 @@ YAMP - Yet Another Music Player
 
 
 TODO:
-- initial: serve music from express, feetch songs from sveltekit, select songs to play in list
-- indexDB mirror db; sync server->client db on load
-- client->server updating (playcount, lastPlayed)
 - docker setup + secrets fetch (.env only for development)
+- Structure:
+        App
+            - on PlayerController.songFinished -> update server controller (playCount, lastListened) -> update library (onServerUpdated)
+        ServerController
+            - indexeddb caching
+            - event: library updated  -- perhaps patch update so we only update specific songIdx
+        LibraryController
+            - library, playlists, filtering/activeView, getSongAtIndex
+            - on ServerController.libraryUpdated: update library/playlist -> event libraryUpdated  -- eg. playCount, last listen
+            - events: libraryUpdated
+        PlayerController
+            - state (for Player.svelte): current time, paused, playing, etc.
+            - events: song finished -> play next
+        MediaPlaylist.svelte
+            - playlist
+            - filtering/sorting list
+            - on LibraryController.libraryUpdated -> update list (refresh)
+        Player.svelte  -- self contained element, import appState to show current song and songState (time), all call on events (clicked resume/pause/etc.)
+            - replace video element with homebuilt one
+            - events: resume, pause, seek, loop
+
 
 
 - build media files on the fly
 - compare banshee + database to make sure we're perfectly synced; maybe script it so we can detect any out of sync
 - drag/drop song into playlist to upload + add to queue; sync to local folder
+- indexDB mirror db; sync server->client db on load
+- playlist handling, reordering songs, drag/drop songs into playlist, etc.
+- in-playlist song wave insiration: https://www.bypeople.com/waveform-ui-js-component/  dotted waves
+- dashy plugin to embed
+
+- indexDB store cached streamed songs (useful for flakey connection, or no connection yet) to save the last 20 songs; then dash.js intercept requests and fetch from indexDB instead
 
 - Things to read up on
-    svelte: https://svelte.dev/docs/svelte/v5-migration-guide , runes, svelte adapter
-    express, tailwindcss, postcss, vite, biome, stylelint, elasticsearch, typescript, ts-node, nodemon, redux or svelte-redux-store?, dash.js, graphql + apollo?
+    svelte: https://svelte.dev/docs/svelte/v5-migration-guide
+    express, tailwindcss, postcss, vite, biome, stylelint, typescript, ts-node, nodemon, dash.js, audioMotion-analyzer
 
 
 # Music Import
