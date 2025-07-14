@@ -3,12 +3,12 @@ import "../app.css";
 
 const { children } = $props();
 import { onMount } from 'svelte';
-import { app, appState } from '$lib/app.svelte';
+import App, { appState } from '$lib/app.svelte';
 
 // Initialize the app on mount (client-side only)
 onMount(async () => {
     // +layout.svelte mount, so that we only initialize app once despite route changes
-    await app.initialize();
+    await App.initialize();
 });
 
 
@@ -22,7 +22,7 @@ onMount(async () => {
   <div class="error-container">
     <h2>Error initializing application</h2>
     <p>{appState.error}</p>
-    <button on:click={() => app.initialize()}>Retry</button>
+    <button on:click={() => App.initialize()}>Retry</button>
   </div>
 {:else}
   <!-- Your app layout -->

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { app, appState } from '$lib/app.svelte';
+import App, { appState } from '$lib/app.svelte';
 import { onMount } from 'svelte';
 
 import AudioMotionAnalyzer from 'audiomotion-analyzer';
@@ -7,7 +7,7 @@ import AudioMotionAnalyzer from 'audiomotion-analyzer';
 onMount(async () => {
 
     // Player page: initialize the player
-    await app.initializePlayer();
+    await App.initializePlayer();
 
     // FIXME: cleanup
     const audioMotion = new AudioMotionAnalyzer(

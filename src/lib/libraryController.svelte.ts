@@ -1,5 +1,5 @@
 import config from '$lib/config';
-import ServerController from '$lib/srvrController.svelte.ts';
+import DBController from '$lib/dbController.svelte.ts';
 
 class LibraryController {
     private static instance: LibraryController;
@@ -11,7 +11,7 @@ class LibraryController {
     }
 
     async initialize() {
-        this.library = await ServerController.getLibrary();
+        this.library = await DBController.getLibrary();
     }
 
     public getSongAt(idx) {

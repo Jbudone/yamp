@@ -1,6 +1,6 @@
 import config from '$lib/config';
 import PlayerController from '$lib/playerController.svelte.ts';
-import ServerController from '$lib/srvrController.svelte.ts';
+import DBController from '$lib/dbController.svelte.ts';
 import LibraryController from '$lib/libraryController.svelte.ts';
 
 export const appState = $state({
@@ -22,12 +22,13 @@ class App {
     }
 
     async initialize() {
+        console.clear();
         console.log('Initializing application...');
 
         try {
             // Set loading state
             appState.loading = true;
-            await ServerController.initialize();
+            await DBController.initialize();
 
             await LibraryController.initialize();
 

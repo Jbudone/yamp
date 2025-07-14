@@ -1,5 +1,5 @@
 <script lang="ts">
-import { app, appState } from '$lib/app.svelte';
+import App, { appState } from '$lib/app.svelte';
 import LibraryController from '$lib/libraryController.svelte';
 
 import HyperList from 'hyperlist';
@@ -16,7 +16,7 @@ $effect(() => {
 
 const clickedSong = (songRow) => {
     console.log(songRow.song_name);
-    app.clickedSong(songRow);
+    App.clickedSong(songRow);
 };
 
 const initialize = () => {

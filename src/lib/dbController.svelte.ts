@@ -1,11 +1,10 @@
-// FIXME: svelte protection measure prevents src/lib/server* from going into client code. I think that's a bug and its supposed to be src/lib/server/* 
 import config from '$lib/config';
 
-class ServerController {
-    private static instance: ServerController;
+class DBController {
+    private static instance: DBController;
 
-    public static get Instance(): ServerController {
-        return this.instance || (this.instance = new ServerController());
+    public static get Instance(): DBController {
+        return this.instance || (this.instance = new DBController());
     }
 
     async initialize() {
@@ -27,4 +26,4 @@ class ServerController {
     }
 }
 
-export default ServerController.Instance;
+export default DBController.Instance;

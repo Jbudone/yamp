@@ -50,8 +50,9 @@ class PlayerController {
                 const manifestUrl = URL.createObjectURL(blob);
 
                 // FIXME: for debugging purposes
-                //localStorage[manifestUrl] = request.url;
+                localStorage[manifestUrl] = request.url;
 
+                console.log(`${manifestUrl}  -- from --> ${request.url}`);
                 request.url = manifestUrl;
                 return Promise.resolve(request);
             }
@@ -75,34 +76,44 @@ class PlayerController {
             let url = response.url;
             if (!url) {
                 // FIXME: I don't understand why this is null sometimes
-                debugger;
-                return Promise.resolve(response)
+                //debugger;
+                return Promise.resolve(response);
             }
 
             let isBlob = response.url.indexOf("blob:") >= 0;
             let isM4s = response.url.indexOf('m4s') >= 0;
 
-            if (localStorage[url] || isBlob) {
+            // FIXME: for debugging blob
+            let COMPARE_BLOB_AGAINST_LOCALSTORAGE = false;
+
+            // Convert blob format
+            if (isBlob) {
+                const blob1 = new Uint8Array(response.data);
+                let blob2 = "";
+                for (let i = 0; i < blob1.length; ++i) {
+                    blob2 += String.fromCharCode(blob1[i]);
+                }
+
+                blob2 = atob(blob2);
+                const blob3 = new ArrayBuffer(blob2.length);
+                const blobView = new Uint8Array(blob3);
+                for (let i = 0; i < blobView.length; ++i) {
+                    blobView[i] = blob2.charCodeAt(i);
+                }
+
+                response.data = blob3;
+            }
+
+            if (localStorage[url] && (!isBlob || COMPARE_BLOB_AGAINST_LOCALSTORAGE)) {
+
                 // FIXME: confirm response matches what we cached; or is there anything else in response that we need to hack in when using blob?
                 //debugger;
-
-                // Convert blob format
                 if (isBlob) {
-                    const blob1 = new Uint8Array(response.data);
-                    let blob2 = "";
-                    for (let i = 0; i < blob1.length; ++i) {
-                        blob2 += String.fromCharCode(blob1[i]);
-                    }
 
-                    blob2 = atob(blob2);
-                    const blob3 = new ArrayBuffer(blob2.length);
-                    const blobView = new Uint8Array(blob3);
-                    for (let i = 0; i < blobView.length; ++i) {
-                        blobView[i] = blob2.charCodeAt(i);
+                    // FIXME: for debugging
+                    if (COMPARE_BLOB_AGAINST_LOCALSTORAGE) {
+                        response.url = localStorage[response.url];
                     }
-
-                    response.data = blob3;
-                    response.url = localStorage[response.url];
                 }
 
                 // Compare against localStorage

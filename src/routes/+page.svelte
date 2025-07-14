@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onMount } from 'svelte';
-import { app, appState } from '$lib/app.svelte';
+import App, { appState } from '$lib/app.svelte';
 import Player from '../components/player.svelte';
 import MediaPlaylist from '../components/mediaPlaylist.svelte';
 </script>
