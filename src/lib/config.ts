@@ -1,5 +1,5 @@
 const config: ClientConfig = {
-    INDEXDB_VER: import.meta.env.VITE_INDEXDB_VER,
+    INDEXEDDB_VER: import.meta.env.VITE_INDEXEDDB_VER,
     APP_VERSION: import.meta.env.VITE_APP_VERSION || '0.0.0',
     DEBUG_MODE: import.meta.env.VITE_DEBUG_MODE === 'true',
 

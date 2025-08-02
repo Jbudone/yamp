@@ -14,6 +14,9 @@ onMount(async () => {
 
 </script>
 
+<!-- FIXME: fix this to use the imported tabulator instead -->
+<link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
+
 {#if appState.loading}
   <div class="loading-overlay">
     <p>Loading application...</p>

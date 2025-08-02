@@ -71,7 +71,7 @@ onMount(async () => {
 
 </script>
 
-<video id="videoPlayer" controls autoplay></video>
+<video id="videoPlayer" controls></video>
 <div id='audioMotion'></div>
 
 PLAYER

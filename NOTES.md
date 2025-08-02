@@ -6,9 +6,10 @@ TODO:
 - Structure:
         App
             - on PlayerController.songFinished -> update server controller (playCount, lastListened) -> update library (onServerUpdated)
-        ServerController
+        DBController
             - indexeddb caching
             - event: library updated  -- perhaps patch update so we only update specific songIdx
+            - cacheHasSegment, cacheGetSegment, getLibrary, updateSong  (don't forget async tasks -> need to await/lock so we don't process indexeddb updates while a server db update is in flight)
         LibraryController
             - library, playlists, filtering/activeView, getSongAtIndex
             - on ServerController.libraryUpdated: update library/playlist -> event libraryUpdated  -- eg. playCount, last listen
@@ -16,13 +17,19 @@ TODO:
         PlayerController
             - state (for Player.svelte): current time, paused, playing, etc.
             - events: song finished -> play next
+            - FIX: cache title as `/song_5294/stream.m4s` as opposed to the whole url, so that it doesn't rely on token in url
         MediaPlaylist.svelte
             - playlist
             - filtering/sorting list
             - on LibraryController.libraryUpdated -> update list (refresh)
         Player.svelte  -- self contained element, import appState to show current song and songState (time), all call on events (clicked resume/pause/etc.)
-            - replace video element with homebuilt one
+            - controls
             - events: resume, pause, seek, loop
+- UI inspiration:
+    https://dribbble.com/shots/6485692-Music-Desktop-Player-Dark-Version
+    https://dribbble.com/shots/20250807-Music-Player-Desktop-Version-Penox
+    https://dribbble.com/shots/11639192-Music-Player-Desktop-App
+    https://dribbble.com/shots/19725321-Music-player-Desktop-App
 
 
 
@@ -32,7 +39,12 @@ TODO:
 - indexDB mirror db; sync server->client db on load
 - playlist handling, reordering songs, drag/drop songs into playlist, etc.
 - in-playlist song wave insiration: https://www.bypeople.com/waveform-ui-js-component/  dotted waves
-- dashy plugin to embed
+- MusizBrainz
+- Edit song
+- Replace song w/ higher quality alternative -- also remove previous one from CDN
+- sync from CDN -> PC? Or maybe we download to Backblaze inititally and then sync from there to PC
+- context menus
+- date_addeed and date_played don't lineup exactly with Banshee, why?
 
 - indexDB store cached streamed songs (useful for flakey connection, or no connection yet) to save the last 20 songs; then dash.js intercept requests and fetch from indexDB instead
 

@@ -5,8 +5,8 @@ import Player from '../components/player.svelte';
 import MediaPlaylist from '../components/mediaPlaylist.svelte';
 </script>
 
-<h1>Welcome!!! to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<h1>Yet Another Music Player</h1>
+<p>Thanks a lot Josh, like we really needed another one</p>
 
 <MediaPlaylist />
 <Player />

@@ -4,6 +4,8 @@ import { MediaPlayer } from 'dashjs';
 import EventEmitter from 'eventemitter3';
 
 import config from '$lib/config';
+import DBController from '$lib/dbController.svelte.ts';
+import LibraryController from '$lib/libraryController.svelte';
 
 export const playerState = $state({
     activeSong: null
@@ -34,32 +36,32 @@ class PlayerController {
         this.player = MediaPlayer().create();
 
         // FIXME: hardcoded song for testing
-        playerState.activeSong = 'song_5294';
+        //playerState.activeSong = 'song_5294';
         localStorage.clear(); // FIXME: for debugging
 
-        const url = await this.buildURLPath(playerState.activeSong, 'manifest.mpd');
-        this.player.initialize(document.querySelector('video'), url, true);
+        //const url = await this.buildURLPath(playerState.activeSong, 'manifest.mpd');
+        this.player.initialize(document.querySelector('video'));//, url, true);
 
         // Request Interceptor
         // We replace CDN requests with cached segments in indexedDB if available
         const interceptorRequest: RequestInterceptor = async (request: CommonMediaRequest) => {
 
-            if (localStorage[request.url]) {
-                const cachedResponse = localStorage[request.url];
-                const blob = new Blob([cachedResponse], {type: 'application/dash+xml'});
+            //console.log(`Requesting chunk ${request.url.substr(request.url.lastIndexOf('/') + 1)}`);
+            const u = new URL(request.url);
+            const resource = u.pathname.substr(u.pathname.lastIndexOf('/')+1);
+            request.customData.resource = resource;
+
+            // DB Cache if available
+            const cachedResource = await DBController.getCache(playerState.activeSong, resource);
+            if (cachedResource) {
+                const blob = new Blob([cachedResource], {type: 'application/dash+xml'});
                 const manifestUrl = URL.createObjectURL(blob);
-
-                // FIXME: for debugging purposes
-                localStorage[manifestUrl] = request.url;
-
-                console.log(`${manifestUrl}  -- from --> ${request.url}`);
                 request.url = manifestUrl;
+                request.customData.yampCache = resource;
+                //console.log(`Using Cached Chunk: ${playerState.activeSong}-${resource}`);
                 return Promise.resolve(request);
             }
 
-            console.log(`Requesting chunk ${request.url.substr(request.url.lastIndexOf('/') + 1)}`);
-            const u = new URL(request.url);
-            const resource = u.pathname.substr(u.pathname.lastIndexOf('/')+1);
 
             request.url = await this.buildURLPath(playerState.activeSong, resource);
             console.log(request.url);
@@ -144,8 +146,9 @@ class PlayerController {
 
             // Cache chunk
             // FIXME: cache non-m4s chunks too
-            if (!localStorage[url] && !isBlob && isM4s) {
-                console.log(`Caching chunk ${url.substr(url.lastIndexOf('/') + 1)}`);
+            if (!response.request.customData.yampCache) {
+            //if (!localStorage[url] && !isBlob && isM4s) {
+                //console.log(`Caching chunk ${url.substr(url.lastIndexOf('/') + 1)}`);
                 let responseData = response.data;
                 if (response.data instanceof ArrayBuffer) {
                     const bytes = new Uint8Array(response.data); // FIXME: Can we ensure this is always an 8bit view?
@@ -155,9 +158,11 @@ class PlayerController {
                     }
 
                     responseData = btoa(binary);
-                    localStorage[url] = responseData;
+                    //localStorage[url] = responseData;
+                    // FIXME: async op but ideally we don't wait on it
+                    DBController.addCache(playerState.activeSong, response.request.customData.resource, responseData);
                 } else {
-                    debugger; // FIXME: Only support binary segments now? non-binary will be different handling later
+                    //debugger; // FIXME: Only support binary segments now? non-binary will be different handling later
                 }
             }
 
@@ -168,7 +173,7 @@ class PlayerController {
         this.player.addResponseInterceptor(interceptorResponse)
         this.player.on(MediaPlayer.events.PLAYBACK_ENDED, this.onSongFinished, this);
 
-        this.player.play();
+        //this.player.play();
     }
 
     private getURLBasePath(songId) {
@@ -237,9 +242,14 @@ class PlayerController {
         console.log('onSongFinished');
         this.EE.emit('songFinished');
 
-        let activeSongId = parseInt(playerState.activeSong.substr(playerState.activeSong.indexOf('_') + 1));
-        playerState.activeSong = `song_${activeSongId + 1}`;
-        this.playSong(playerState.activeSong);
+        await DBController.updateSongPlayed(playerState.activeSong);
+
+        //let activeSongId = parseInt(playerState.activeSong.substr(playerState.activeSong.indexOf('_') + 1));
+        let nextSongId = LibraryController.getNextSongAfter(playerState.activeSong);
+        if (nextSongId != -1) {
+            playerState.activeSong = nextSongId;// `song_${nextSongId}`;
+            this.playSong(playerState.activeSong);
+        }
     }
 };
 

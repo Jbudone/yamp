@@ -7,7 +7,7 @@ import { drizzle } from 'drizzle-orm/mysql2';
 import 'dotenv/config';
 import path from "path";
 
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { songsTable } from './db/schema.ts';
 
 const db = drizzle(process.env.DATABASE_URL!);
@@ -34,6 +34,17 @@ async function startDevServer() {
         console.log('Getting all users from the database!   : ', songs)
 
         res.json(songs);
+    });
+
+    app.get('/api/updateSongPlayed/:id', async (req: Request, res: Response) => {
+        const songId = req.params.id;
+        const v = await db.update(songsTable)
+                            .set({
+                                play_count: sql`${songsTable.play_count} + 1`,
+                                date_played: sql`NOW()`
+                            })
+                            .where(eq(songsTable.cdnpath, songId));
+        res.json(v);
     });
 
     // logger for GET/POST requests
