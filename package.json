@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "nodemon --watch server --ext ts,js --exec \"node server/main.ts\"",
 		"build": "vite build",
+        "push": "docker build -t ghcr.io/jbudone/yamp:latest . && docker push ghcr.io/jbudone/yamp:latest",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "biome check",

@@ -56,15 +56,13 @@ async function startDevServer() {
     app.use(loggerMiddleware);
 
     // Vite
-    if (isDev) {
-        // run vite as middleware (along with server) so that we don't need to run express + vite separately
-        const vite = await viteCreateServer({
-            server: { middlewareMode: true },
-            appType: 'custom'
-        });
+    // run vite as middleware (along with server) so that we don't need to run express + vite separately
+    const vite = await viteCreateServer({
+        server: { middlewareMode: true, allowedHosts: true },
+        appType: 'custom'
+    });
 
-        app.use(vite.middlewares);
-    }
+    app.use(vite.middlewares);
 
     // Takeoff
     const server = http.createServer(app);
