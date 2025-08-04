@@ -6,6 +6,7 @@ TODO:
 - space to pause/resume
 - only scroll to song row if not already in view
 - don't scroll to song if its just playing the next song
+- indexedDB only cache up to a total size amount, sorted by most recently played
 - Structure:
         App
             - on PlayerController.songFinished -> update server controller (playCount, lastListened) -> update library (onServerUpdated)
