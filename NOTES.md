@@ -2,7 +2,8 @@ YAMP - Yet Another Music Player
 
 
 TODO:
-- docker setup + secrets fetch (.env only for development)
+- show list sorting (which column is currently sorted)
+- space to pause/resume
 - Structure:
         App
             - on PlayerController.songFinished -> update server controller (playCount, lastListened) -> update library (onServerUpdated)
