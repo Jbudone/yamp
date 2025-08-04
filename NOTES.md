@@ -7,6 +7,8 @@ TODO:
 - only scroll to song row if not already in view
 - don't scroll to song if its just playing the next song
 - indexedDB only cache up to a total size amount, sorted by most recently played
+- streamline adding new songs, building/uploading to CDN
+- fixup song conversion to use highest quality; replace songs in-place (replace content in CDN, find a way to flush indexedDB for song -- we'll need this later when we update songs by fetching better quality version externally)
 - Structure:
         App
             - on PlayerController.songFinished -> update server controller (playCount, lastListened) -> update library (onServerUpdated)
