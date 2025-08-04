@@ -4,6 +4,8 @@ YAMP - Yet Another Music Player
 TODO:
 - show list sorting (which column is currently sorted)
 - space to pause/resume
+- only scroll to song row if not already in view
+- don't scroll to song if its just playing the next song
 - Structure:
         App
             - on PlayerController.songFinished -> update server controller (playCount, lastListened) -> update library (onServerUpdated)
