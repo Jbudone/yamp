@@ -2,6 +2,7 @@ YAMP - Yet Another Music Player
 
 
 TODO:
+- localstorage settings: table column sizing, sorts, last scrollTo position
 - show list sorting (which column is currently sorted)
 - space to pause/resume
 - only scroll to song row if not already in view
