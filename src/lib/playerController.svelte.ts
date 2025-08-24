@@ -4,11 +4,17 @@ import { MediaPlayer } from 'dashjs';
 import EventEmitter from 'eventemitter3';
 
 import config from '$lib/config';
+import App from '$lib/app.svelte';
 import DBController from '$lib/dbController.svelte.ts';
 import LibraryController from '$lib/libraryController.svelte';
 
 export const playerState = $state({
-    activeSong: null
+    activeSong: null,
+    playing: false,
+    totalTime: 0,
+    curTime: 0,
+
+    volume: 1
 });
 
 
@@ -33,11 +39,15 @@ class PlayerController {
     async init() {
         this.EE = new EventEmitter();
 
+
         this.player = MediaPlayer().create();
 
         // FIXME: hardcoded song for testing
         //playerState.activeSong = 'song_5294';
         localStorage.clear(); // FIXME: for debugging
+    }
+
+    async postInitSetup() {
 
         //const url = await this.buildURLPath(playerState.activeSong, 'manifest.mpd');
         this.player.initialize(document.querySelector('video'));//, url, true);
@@ -172,6 +182,8 @@ class PlayerController {
         this.player.addRequestInterceptor(interceptorRequest)
         this.player.addResponseInterceptor(interceptorResponse)
         this.player.on(MediaPlayer.events.PLAYBACK_ENDED, this.onSongFinished, this);
+        this.player.on(MediaPlayer.events.PLAYBACK_TIME_UPDATED, this.onSongTimeUpdated, this);
+        this.player.on(MediaPlayer.events.PLAYBACK_METADATA_LOADED, this.onSongMetadata, this);
 
         //this.player.play();
     }
@@ -231,6 +243,7 @@ class PlayerController {
 
     public async playSong(cdnPath) {
         playerState.activeSong = cdnPath;
+        playerState.playing = true;
         const url = await this.buildURLPath(playerState.activeSong, 'manifest.mpd');
         this.player.attachSource(url);
         this.player.play();
@@ -238,11 +251,49 @@ class PlayerController {
         this.EE.emit('playingSong', cdnPath);
     }
 
-    private async onSongFinished() {
-        console.log('onSongFinished');
-        this.EE.emit('songFinished');
+    public async resumeSong() {
 
-        await DBController.updateSongPlayed(playerState.activeSong);
+        if (playerState.activeSong == null) {
+            // initial play
+            this.EE.emit('clickedPlayWithNoSong');
+            return;
+        }
+
+        playerState.playing = true;
+        this.player.play();
+
+        this.EE.emit('resumedSong');
+    }
+
+    public async pauseSong() {
+        playerState.playing = false;
+        this.player.pause();
+
+        this.EE.emit('pausedSong');
+    }
+
+    public async prevSong() {
+        
+        if (playerState.activeSong == null) {
+            // initial play
+            return;
+        }
+
+        //let activeSongId = parseInt(playerState.activeSong.substr(playerState.activeSong.indexOf('_') + 1));
+        let prevSongId = LibraryController.getPrevSongAfter(playerState.activeSong);
+        if (prevSongId != -1) {
+            playerState.activeSong = prevSongId;// `song_${nextSongId}`;
+            this.playSong(playerState.activeSong);
+        }
+    }
+
+    public async nextSong() {
+        
+        if (playerState.activeSong == null) {
+            // initial play
+            return;
+        }
+
 
         //let activeSongId = parseInt(playerState.activeSong.substr(playerState.activeSong.indexOf('_') + 1));
         let nextSongId = LibraryController.getNextSongAfter(playerState.activeSong);
@@ -251,6 +302,35 @@ class PlayerController {
             this.playSong(playerState.activeSong);
         }
     }
+
+    public async seekSong(t) {
+        this.player.seek(t);
+    }
+
+    public async setVolume(v) {
+        this.player.setVolume(v);
+        playerState.volume = v;
+    }
+
+    private async onSongFinished() {
+        console.log('onSongFinished');
+        this.EE.emit('songFinished');
+
+        await DBController.updateSongPlayed(playerState.activeSong);
+
+        this.nextSong();
+    }
+
+    private async onSongMetadata() {
+        playerState.totalTime = this.player.duration();
+    }
+
+    private async onSongTimeUpdated(e) {
+        //this.EE.emit('songTimeUpdated');
+
+        playerState.curTime = e.time;
+    }
+
 };
 
 export default PlayerController.Instance;

@@ -1,11 +1,11 @@
 <script lang="ts">
 import App, { appState } from '$lib/app.svelte';
 import LibraryController from '$lib/libraryController.svelte';
+import PlayerController from '$lib/playerController.svelte.ts';
 import { TabulatorFull as Tabulator } from 'tabulator-tables';
 import { DateTime } from 'luxon';
 import { playerState } from '$lib/playerController.svelte';
 
-import HyperList from 'hyperlist';
 import u from 'umbrellajs';
 
 let libraryEl = null;
@@ -53,7 +53,6 @@ const initialize = () => {
                 title:"Title",
                 field:"song_name",
                 sorter:"string",
-                width:200,
                 //formatter: (cell) => {
                 //    if (cell.getValue().indexOf('ActiveSong') >= 0) {
                 //        cell.getElement().classList.add('ActiveSong');
@@ -61,35 +60,40 @@ const initialize = () => {
                 //}
             },
             {
-                title:"song_artist",
+                title:"Artist",
+                width: 100,
                 field:"song_artist",
                 sorter:"string"
             },
             {
-                title:"Play Count",
+                title:"Plays",
                 field:"play_count",
                 sorter:"number",
+                width: 60,
                 hozAlign:"right",
                 //formatter:"progress" // FIXME: consider progress bar? it sure looks cool but we still need the number
             },
             {
-                title:"Length",
+                title:"Duration",
                 field:"duration",
                 sorter:"number", // FIXME: duration was formatted to a string, but we want to sort by its int format. Can we reference the data's original duration and use that as sort?
+                width: 50,
                 cellClick:function(e, cell){console.log("cell click")}
             },
             {
-                title:"date_played",
+                title:"Last Played",
                 field:"date_played",
                 sorter:"datetime",
+                width: 160,
                 sorterParams: {
                     format: "MM/dd/yyyy h:mm:ss a",
                 }
             },
             {
-                title:"date_added",
+                title:"Date Added",
                 field:"date_added",
                 sorter:"datetime",
+                width: 160,
                 sorterParams: {
                     format: "MM/dd/yyyy h:mm:ss a",
                 }
@@ -98,7 +102,8 @@ const initialize = () => {
         index: 'id',
         data: libraryDataView,
         //reactiveData: true,
-        maxHeight: 590,
+        maxHeight: 390,
+        height: '100%',
         layout:"fitColumns",
         //selectableRows: 1,
         //progressiveRender:true,
@@ -123,12 +128,27 @@ const initialize = () => {
     });
 
     LibraryController.EE.on('libraryUpdated', onLibraryUpdated, this);
+    LibraryController.EE.on('libraryViewChanged', onLibraryUpdated, this);
+    PlayerController.EE.on('clickedPlayWithNoSong', onClickedPlayWithNoSong, this);
 };
 
 const onLibraryUpdated = () => {
     let libraryDataView = LibraryController.GetDataView();
     table.setData(libraryDataView);
     tableUpdated();
+};
+
+const onClickedPlayWithNoSong = () => {
+
+    let data = table.getData();
+    if (data.length == 0) return;
+
+    let row = table.getRow(data[0].id);
+    table.selectRow(row);
+
+    // FIXME: copy/paste of rowDblClick evt
+    const id = row.getIndex();
+    App.clickedSong(row.getData());
 };
 
 const setActiveSong = (id) => {
@@ -147,21 +167,8 @@ const setActiveSong = (id) => {
     }
 };
 
-const filterText = (e) => {
-    const text = e.target.value;
-    LibraryController.filterText(text);
-
-    let libraryDataView = LibraryController.GetDataView();
-    table.setData(libraryDataView);
-    tableUpdated();
-};
-
 const filterSort = (filterType) => {
     LibraryController.filterSort(filterType);
-
-    let libraryDataView = LibraryController.GetDataView();
-    table.setData(libraryDataView);
-    tableUpdated();
 };
 
 let scrollingToRowPending = null;
@@ -193,36 +200,17 @@ const tableUpdated = () => {
     }
 };
 
+import './tabulator_simple.css';
+import './tabulator_josh.css';
 </script>
 
-MEDIA PLAYLIST
-<input type='text' id='libraryTextFilter' on:input={filterText} />
-
-<!--
-<table id='libraryContainer'>
-<thead>
-    <tr>
-        <th id='libraryColTitle' on:click={() => filterSort(LibraryController.SORT_TITLE)}>Song Name</th>
-        <th id='libraryColTitle'>Play Count</th>
-        <th id='libraryColTitle'>Length</th>
-    </tr>
-</thead>
-<tbody id='library'>
-</tbody>
-</table>
--->
-
-
-<div id='libraryContainer'>
-    <div id='libraryCols'>
-        <span id='libraryColTitle' on:click={() => filterSort(LibraryController.SORT_TITLE)}>Song Name</span>
-        <span id='libraryColPlayCount'>Play Count</span>
-        <span id='libraryColLength'>Length</span>
-    </div>
+<div id='mediaContainer' class='mx-8'>
+<div id='library' class=''></div>
 </div>
-<div id='library'></div>
 
 <style>
+
+
 #library {
 }
 
@@ -234,28 +222,8 @@ display: flex;
 width: 400px;
 }
 
-:global(.song) {
-display: flex;
-}
+:global {
 
-:global(.songTitle) {
-width: 400px;
-}
-
-:global(.songPlayCount) {
-
-}
-
-:global(.ActiveSong) {
-    color: red;
-}
-
-:global(.tabulator-row.tabulator-selected) {
-    color: red;
-}
-
-:global(.tabulator-cell) {
-    user-select: none; /* FIXME: not working, it still selects */
 }
 </style>
 

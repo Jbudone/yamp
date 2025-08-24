@@ -1,6 +1,7 @@
 import config from '$lib/config';
 import DBController from '$lib/dbController.svelte.ts';
 import { DateTime } from 'luxon';
+import * as Utilities from '$lib/utilities.svelte.ts';
 import EventEmitter from 'eventemitter3';
 
 class LibraryController {
@@ -41,18 +42,7 @@ class LibraryController {
 
             // Format duration
             const song = this.library[i];
-            const duration = song.duration;
-            const seconds = duration % 60,
-                minutes = Math.floor(duration / 60) % 60,
-                hours = Math.floor(duration / (60 * 60));
-
-            const formattedHours = (hours > 0) ? (hours + ':') : '',
-                formattedMinutes = (minutes > 0) ?
-                    ((hours > 0) ? (String(minutes).padStart(2, '0') + ':') : (minutes + ':')) : '0:',
-                formattedSeconds = String(seconds).padStart(2, '0');
-            
-            let formatted = formattedHours + formattedMinutes + formattedSeconds;
-            song.duration = formatted;
+            song.duration = Utilities.formatTime(song.duration);
 
             // Format dates
             song.date_played = DateTime.fromISO(song.date_played).toFormat('MM/dd/yyyy h:mm:ss a');
@@ -90,6 +80,7 @@ class LibraryController {
             this.filters.sortOrder = (this.filters.sortOrder == this.SORT_ASCEND ? this.SORT_DESCEND : this.SORT_ASCEND);
         }
         this.filterView();
+        this.onLibraryViewChanged();
     }
 
     public getSongAt(idx) {
@@ -119,6 +110,24 @@ class LibraryController {
         return this.activeView[songIdx].cdnpath;
     }
 
+    public getPrevSongAfter(songId) {
+        if (this.activeView.length == 0) {
+            return -1;
+        }
+
+        let songIdx = 0;
+        for (let i = 0; i < this.activeView.length; ++i) {
+            let thisSongId = this.activeView[i].cdnpath;
+            //let thisSongId = parseInt(thisSongPath.substr(thisSongPath.indexOf('_') + 1));
+            if (thisSongId == songId) {
+                songIdx = (i == 0 ? this.activeView.length - 1 : (i - 1) % this.activeView.length);
+                break;
+            }
+        }
+
+        return this.activeView[songIdx].cdnpath;
+    }
+
     public GetDataView() {
         return this.activeView;
     }
@@ -130,6 +139,10 @@ class LibraryController {
         this.filterView();
 
         this.EE.emit('libraryUpdated');
+    }
+
+    async onLibraryViewChanged() {
+        this.EE.emit('libraryViewChanged');
     }
 }
 

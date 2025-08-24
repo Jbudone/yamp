@@ -31,6 +31,7 @@ class App {
             await DBController.initialize();
 
             await LibraryController.initialize();
+            await this.initializePlayer();
 
             // Mark as initialized
             appState.loading = false;
@@ -57,6 +58,8 @@ class App {
 
     private async onStartPlayingSong(cdnPath) {
         console.log(`App: onStartPlayingSong ${cdnPath}`);
+
+        document.title = "playing";
     }
 
     private async onFinishedPlayingSong() {
