@@ -70,6 +70,7 @@ class LibraryController {
     public filterText(text) {
         this.filters.text = text;
         this.filterView();
+        this.onLibraryViewChanged();
     }
 
     public filterSort(filterType) {

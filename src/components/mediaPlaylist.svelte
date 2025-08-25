@@ -103,7 +103,7 @@ const initialize = () => {
         data: libraryDataView,
         //reactiveData: true,
         maxHeight: 390,
-        height: '100%',
+        //height: '100%',
         layout:"fitColumns",
         //selectableRows: 1,
         //progressiveRender:true,
