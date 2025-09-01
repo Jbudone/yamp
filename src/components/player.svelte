@@ -116,9 +116,28 @@ const clickedRepeat = (e) => {
 </script>
 
 <style>
-:global(progress::-moz-progress-bar,progress::-webkit-progress-value) {
-    background-color:crimson;
-    border-radius: 40px;
+:global {
+
+    progress::-moz-progress-bar {
+        background-color: #313131;
+        border-radius: 40px;
+    }
+
+    progress::-webkit-progress-bar {
+        background-color: #313131;
+        border-radius: 40px;
+    }
+
+
+    progress::-moz-progress-value {
+        background-color:crimson;
+        border-radius: 40px;
+    }
+
+    progress::-webkit-progress-value {
+        background-color:crimson;
+        border-radius: 40px;
+    }
 }
 </style>
 
@@ -145,11 +164,11 @@ const clickedRepeat = (e) => {
             <div id="controlsVolIcon" on:click={clickedVolMute} class="mx-6">
                 <svg class="icon w-6 h-6 cursor-pointer"> <use href="icons.svg#icon-{playerState.volume == 0 ? 'volume' : 'mute'}"></use> </svg>
             </div>
-            <progress id="controlsVol" on:click={clickedVolume} class="w-20 h-3 bg-black rounded-lg cursor-pointer mt-2" value="{playerState.volume * 100}" max="100"></progress>
+            <progress id="controlsVol" on:click={clickedVolume} class="w-20 h-3 rounded-lg cursor-pointer mt-2" value="{playerState.volume * 100}" max="100"></progress>
         </div>
     </div>
     <div id="playerFooter" class="flex flex-col items-center">
-        <progress id="controlsSeek" on:click={clickedSeek} class="w-full h-6 bg-black rounded-full cursor-pointer" value="{playerState.curTime}" max="{playerState.totalTime > 0 ? playerState.totalTime : 1}"></progress>
+        <progress id="controlsSeek" on:click={clickedSeek} class="w-full h-6 rounded-full cursor-pointer" value="{playerState.curTime}" max="{playerState.totalTime > 0 ? playerState.totalTime : 1}"></progress>
         <div id="controlsTime" class="-my-6">
     {Utilities.formatTime(playerState.curTime)} / {Utilities.formatTime(playerState.totalTime)}
         </div>

@@ -47,6 +47,11 @@ body {
     border: none;
 }
 
+.tabulator .tabulator-tableholder {
+    scrollbar-color: #a4a4a4 #313131;
+    scrollbar-width: thin;
+}
+
 .tabulator .tabulator-tableholder .tabulator-table {
     background: none;
     color: #FFF;
