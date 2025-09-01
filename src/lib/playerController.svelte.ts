@@ -23,7 +23,7 @@ class PlayerController {
     private instance: player;
     public EE: EventEmitter;
 
-    private cdnPathToken: object; // FIXME: we should sign the basePath / since otherwise this will have to recalculate for every song
+    private cdnPathToken: object; // sign base path
 
     private constructor() {
         console.log('Player instance created');
@@ -188,13 +188,18 @@ class PlayerController {
         //this.player.play();
     }
 
-    private getURLBasePath(songId) {
-        return `/${songId}/`;
+    private getURLBasePath() {
+        return `/`;
+    }
+
+    private getURLSongPath(songId) {
+        const basePath = this.getURLBasePath();
+        return `${basePath}${songId}/`;
     }
 
     private async buildURLPath(songId, resource) {
         const signedURLPath = await this.getSignedURLPath(songId);
-        const basePath = this.getURLBasePath(songId);
+        const basePath = this.getURLSongPath(songId);
         return signedURLPath + basePath + resource;
     }
 
@@ -207,16 +212,15 @@ class PlayerController {
 
         let signedURLPath = "";
         const nowSec = Math.floor(Date.now() / 1000);
-        if (this.cdnPathToken && this.cdnPathToken.songId == songId && nowSec < this.cdnPathToken.expires) {
+        if (this.cdnPathToken && nowSec < this.cdnPathToken.expires) {
             signedURLPath = this.cdnPathToken.signedURLPath;
         } else {
             // update signed token for song path
             const expirationTimeSec = nowSec + SIGNING_EXPIRATION;
-            const basePath = this.getURLBasePath(songId);
+            const basePath = this.getURLBasePath();
             const signedToken = await this.signURLPath(securityKey, expirationTimeSec, basePath);
             signedURLPath = host + "/" + signedToken;
             this.cdnPathToken.signedURLPath = signedURLPath;
-            this.cdnPathToken.songId = songId;
             this.cdnPathToken.expires = expirationTimeSec - 3; // Give some leeway for initial transit
         }
 
