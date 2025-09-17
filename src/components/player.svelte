@@ -118,23 +118,25 @@ const clickedRepeat = (e) => {
 <style>
 :global {
 
-    progress::-moz-progress-bar {
+    /* NOTE: progress bar having inconsistency in styling rules between webkit and moz */
+    progress {
         background-color: #313131;
         border-radius: 40px;
     }
 
+    /* styling needed for webkit */
     progress::-webkit-progress-bar {
         background-color: #313131;
         border-radius: 40px;
     }
 
-
-    progress::-moz-progress-value {
+    progress::-webkit-progress-value {
         background-color:crimson;
         border-radius: 40px;
     }
 
-    progress::-webkit-progress-value {
+    /* styling needed for moz */
+    progress[value]::-moz-progress-bar {
         background-color:crimson;
         border-radius: 40px;
     }
