@@ -86,3 +86,6 @@ body {
     border: none;
 }
 
+.tabulator-cell::selection {
+    background: none;
+}
