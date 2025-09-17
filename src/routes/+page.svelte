@@ -6,12 +6,12 @@ import Player from '../components/player.svelte';
 import MediaPlaylist from '../components/mediaPlaylist.svelte';
 </script>
 
-<div class='flex'>
-<div class='w-1/5'>
+<div class='overflow-hidden h-screen'>
+<div class='float-left w-1/5'>
     <Sidebar />
 </div>
-<div class='w-full'>
-    <div class='mb-10'>
+<div class='float-right w-4/5'>
+    <div class='mb-30'>
         <Player />
     </div>
     <div class=''>

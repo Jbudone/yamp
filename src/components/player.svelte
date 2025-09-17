@@ -142,7 +142,7 @@ const clickedRepeat = (e) => {
 </style>
 
 
-<div id='audioMotion'></div>
+<div id='audioMotion' class='h-50'></div>
 <video id="videoPlayer" controls class="hidden"></video>
 <div id="musicPlayer" class="px-10">
     <div id="playerBody" class="flex items-center mt-4">
