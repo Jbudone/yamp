@@ -45,23 +45,23 @@ class LibraryController {
             song.duration = Utilities.formatTime(song.duration);
 
             // Format dates
-            song.date_played = DateTime.fromISO(song.date_played).toFormat('MM/dd/yyyy h:mm:ss a');
-            song.date_added = DateTime.fromISO(song.date_added).toFormat('MM/dd/yyyy h:mm:ss a');
+            song.datePlayed = DateTime.fromSeconds(song.datePlayed).toFormat('MM/dd/yyyy h:mm:ss a');
+            song.dateAdded = DateTime.fromSeconds(song.dateAdded).toFormat('MM/dd/yyyy h:mm:ss a');
         }
     }
     
     private filterView() {
         let textFilterPattern = new RegExp(this.filters.text, "i");
         this.activeView = this.library.filter((s) => {
-            return s.song_name.match(textFilterPattern) != null ||
-                s.song_artist.match(textFilterPattern);
+            return s.name.match(textFilterPattern) != null ||
+                s.artist.match(textFilterPattern);
         });
 
         if (this.filters.sort === this.SORT_TITLE) {
             this.activeView.sort((a, b) => {
                 return (
-                    (a.song_name.toLowerCase() > b.song_name.toLowerCase() && this.filters.sortOrder == this.SORT_ASCEND) ||
-                    (a.song_name.toLowerCase() < b.song_name.toLowerCase() && this.filters.sortOrder == this.SORT_DESCEND)
+                    (a.name.toLowerCase() > b.name.toLowerCase() && this.filters.sortOrder == this.SORT_ASCEND) ||
+                    (a.name.toLowerCase() < b.name.toLowerCase() && this.filters.sortOrder == this.SORT_DESCEND)
                 );
             });
         }

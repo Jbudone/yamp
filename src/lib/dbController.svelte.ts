@@ -1,10 +1,12 @@
 import config from '$lib/config';
 import EventEmitter from 'eventemitter3';
+import * as Utilities from '$lib/utilities.svelte.ts';
 
 
 const INDEXEDDB_CACHESWEEP_INTERVAL = 30000;
 const TABLENAME_RESOURCES = 'cachedResources';
 const TABLENAME_META = 'cacheMeta';
+const TABLENAME_LIBRARY = 'library';
 
 class DBController {
     private static instance: DBController;
@@ -37,22 +39,41 @@ class DBController {
             };
 
             dbInitRequest.onupgradeneeded = (e) => {
-                // initial creation or version change
+                debugger;
+                console.log("initial creation or version change of indexedDB");
                 let db = e.target.result;
                 let pendingOps = 0;
 
+                // Resources (cached song segments)
                 ++pendingOps;
                 if (db.objectStoreNames.contains(TABLENAME_RESOURCES)) db.deleteObjectStore(TABLENAME_RESOURCES);
                 const cacheStore = db.createObjectStore(TABLENAME_RESOURCES, { keyPath: "songIdAndResource" });
                 cacheStore.createIndex('songId', 'songId', { unique: false });
                 cacheStore.createIndex('resource', 'resource', { unique: false });
 
+                // Metadata (song metadata)
                 ++pendingOps;
                 if (db.objectStoreNames.contains(TABLENAME_META)) db.deleteObjectStore(TABLENAME_META);
                 const cacheMetaStore = db.createObjectStore(TABLENAME_META, { keyPath: "songId" });
                 cacheMetaStore.createIndex('songId', 'songId', { unique: false });
                 cacheMetaStore.createIndex('datePlayed', 'datePlayed', { unique: false });
                 cacheMetaStore.createIndex('size', 'size', { unique: false });
+
+                // Library
+                ++pendingOps;
+                if (db.objectStoreNames.contains(TABLENAME_LIBRARY)) db.deleteObjectStore(TABLENAME_LIBRARY);
+                const libraryStore = db.createObjectStore(TABLENAME_LIBRARY, { keyPath: "songId" });
+                libraryStore.createIndex('songId', 'songId', { unique: false });
+                libraryStore.createIndex('dateAdded', 'dateAdded', { unique: false });
+                libraryStore.createIndex('datePlayed', 'datePlayed', { unique: false });
+                libraryStore.createIndex('dateUpdated', 'dateUpdated', { unique: false });
+                libraryStore.createIndex('playCount', 'playCount', { unique: false });
+                libraryStore.createIndex('duration', 'duration', { unique: false });
+                libraryStore.createIndex('name', 'name', { unique: false });
+                libraryStore.createIndex('artist', 'artist', { unique: false });
+                libraryStore.createIndex('album', 'album', { unique: false });
+                libraryStore.createIndex('year', 'year', { unique: false });
+                libraryStore.createIndex('cdnpath', 'cdnpath', { unique: false });
 
                 const onPendingFinished = () => {
                     if (--pendingOps == 0) {
@@ -69,13 +90,61 @@ class DBController {
 
     public async getLibrary() {
 
-        const response = await fetch('/api/hello');
-        if (!response.ok) {
-            throw new Error('Server sync failed');
+        let localLibrary = await this.getLocalLibrary();
+        let library = null;
+        if (localLibrary) {
+            library = localLibrary;
+
+            // what's our most recent local update?
+            let latest = 0;
+            for (let i = 0; i < localLibrary.length; ++i) {
+                const song = localLibrary[i];
+                const dateUpdated = song.dateUpdated;
+                const datePlayed = song.datePlayed;
+                if (dateUpdated > latest) latest = dateUpdated;
+                if (datePlayed > latest) latest = datePlayed;
+            }
+
+            // Fetch latest from cloud
+            const response = await fetch(`/api/helloAfter/${latest}`);
+            if (!response.ok) {
+                throw new Error('Server sync failed');
+            }
+
+
+            // merge
+            const responseJson = await response.json();
+            let updatedSongs = [];
+            for (let i = 0; i < responseJson.length; ++i) {
+                const entry = responseJson[i];
+                updatedSongs.push(entry);
+                library.push(entry);
+            }
+
+            // write updates
+            if (responseJson.length > 0) {
+                await this.addSongs(updatedSongs);
+            }
+        } else {
+            // initial fetch
+            const response = await fetch('/api/hello');
+            if (!response.ok) {
+                throw new Error('Server sync failed');
+            }
+
+            const resJson = await response.json();
+
+            // translate
+            library = [];
+            for (let i = 0; i < resJson.length; ++i) {
+                const entry = resJson[i];
+                library.push(entry);
+            }
+
+            await this.addSongs(library);
         }
 
-        const resJson = await response.json();
-        return resJson;
+        return library;
     }
 
     public async getCache(songId, resource) {
@@ -100,6 +169,56 @@ class DBController {
 
             request.onsuccess = (e) => {
                 resolve(request.result);
+            };
+        });
+    }
+
+    public async getLocalLibrary() {
+        return new Promise((resolve, reject) => {
+            const request = this.db.transaction([TABLENAME_LIBRARY], 'readonly').objectStore(TABLENAME_LIBRARY).getAll();
+            request.onerror = (e) => {
+                resolve(null);
+            };
+
+            request.onsuccess = (e) => {
+                resolve(e.target.result);
+            };
+        });
+    }
+
+    public async addSongs(songs) {
+        return new Promise((resolve, reject) => {
+
+            const transaction = this.db.transaction([TABLENAME_LIBRARY], 'readwrite');
+            const objectStore = transaction.objectStore(TABLENAME_LIBRARY);
+
+            for (let i = 0; i < songs.length; ++i) {
+                const song = songs[i];
+
+                // song already exist?
+                const getRequest = objectStore.get(song.songId);
+                getRequest.onerror = (e) => { console.error(`Error getting song ${song.songId}: ` + e.target.error); };
+
+                getRequest.onsuccess = (e) => {
+                    const existingEntry = e.target.result;
+                    if (existingEntry) {
+                        // song exists: update
+                        const updateRequest = objectStore.put(song);
+                        updateRequest.onsuccess = (e) => { console.log(`Updated song ${song.songId}`); };
+                        updateRequest.onerror = (e) => { console.error(`Error updating song ${song.songId}: ` + e.target.error); };
+                    } else {
+                        // does not exist: insert
+                        const insertRequest = objectStore.add(song);
+                        insertRequest.onsuccess = (e) => { console.log(`Inserted song ${song.songId}`); };
+                        insertRequest.onerror = (e) => { console.error(`Error inserting song ${song.songId}: ` + e.target.error); };
+                    }
+                };
+            }
+
+            transaction.oncomplete = resolve;
+            transaction.onerror = (e) => {
+                console.error(`Transaction error: ` + e.target.error);
+                resolve(false);
             };
         });
     }

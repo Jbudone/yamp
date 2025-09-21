@@ -16,4 +16,10 @@ export function formatTime(t) {
     return formatted;
 };
 
+export function getTimezoneGMT(t) {
+    const d = new Date(t);
+    const timezoneOffset = d.getTimezoneOffset() * 60 * 1000;
+    return d.getTime() + timezoneOffset;
+};
+
 //export default LibraryController.Instance;

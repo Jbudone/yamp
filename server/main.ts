@@ -7,7 +7,7 @@ import { drizzle } from 'drizzle-orm/mysql2';
 import 'dotenv/config';
 import path from "path";
 
-import { eq, sql } from 'drizzle-orm';
+import { eq, gt, sql } from 'drizzle-orm';
 import { songsTable } from './db/schema.ts';
 
 const db = drizzle(process.env.DATABASE_URL!);
@@ -25,19 +25,43 @@ async function startDevServer() {
 
     // Routes
     app.use(express.json());
-    //app.use('/api/custom', (req, res) => {
-    //    res.json({ message: 'This is from Express!' });
-    //});
+
+    const songSelect = {
+        'songId': songsTable.id,
+        'dateAdded': sql`UNIX_TIMESTAMP(${songsTable.date_added})`,
+        'datePlayed': sql`UNIX_TIMESTAMP(${songsTable.date_played})`,
+        'dateUpdated': sql`UNIX_TIMESTAMP(${songsTable.date_updated})`,
+        'duration': songsTable.duration,
+        'playCount': songsTable.play_count,
+        'name': songsTable.song_name,
+        'artist': songsTable.song_artist,
+        'album': songsTable.song_album,
+        'year': songsTable.song_year,
+        'cdnpath': songsTable.cdnpath
+    };
 
     app.get("/api/hello", async (req: Request, res: Response) => {
         const songs = await db.select().from(songsTable);
-        console.log('Getting all users from the database!   : ', songs)
+        console.log('Getting all songs from database   : ', songs)
+        console.log('^^^^^^^ ALL songs');
 
         res.json(songs);
     });
 
+    app.get("/api/helloAfter/:timestamp", async (req: Request, res: Response) => {
+        const timestamp = req.params.timestamp;
+        const songs = await db.select(songSelect).from(songsTable)
+                            .where(sql`${songsTable.date_updated} > FROM_UNIXTIME(${timestamp}) or ${songsTable.date_played} > FROM_UNIXTIME(${timestamp})`);
+        console.log('Getting recent songs from database   : ', songs)
+        console.log('^^^^^^^ recent songs: after ' + timestamp);
+
+        res.json(songs);
+    });
+
+
     app.get('/api/updateSongPlayed/:id', async (req: Request, res: Response) => {
         const songId = req.params.id;
+        console.log(`Updating songPlayed: ${songId}`);
         const v = await db.update(songsTable)
                             .set({
                                 play_count: sql`${songsTable.play_count} + 1`,

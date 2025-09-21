@@ -51,7 +51,7 @@ const initialize = () => {
         columns:[
             {
                 title:"Title",
-                field:"song_name",
+                field:"name",
                 sorter:"string",
                 //formatter: (cell) => {
                 //    if (cell.getValue().indexOf('ActiveSong') >= 0) {
@@ -62,12 +62,12 @@ const initialize = () => {
             {
                 title:"Artist",
                 width: 100,
-                field:"song_artist",
+                field:"artist",
                 sorter:"string"
             },
             {
                 title:"Plays",
-                field:"play_count",
+                field:"playCount",
                 sorter:"number",
                 width: 60,
                 hozAlign:"right",
@@ -82,7 +82,7 @@ const initialize = () => {
             },
             {
                 title:"Last Played",
-                field:"date_played",
+                field:"datePlayed",
                 sorter:"datetime",
                 width: 160,
                 sorterParams: {
@@ -91,7 +91,7 @@ const initialize = () => {
             },
             {
                 title:"Date Added",
-                field:"date_added",
+                field:"dateAdded",
                 sorter:"datetime",
                 width: 160,
                 sorterParams: {
@@ -99,7 +99,7 @@ const initialize = () => {
                 }
             }
         ],
-        index: 'id',
+        index: 'songId',
         data: libraryDataView,
         //reactiveData: true,
         maxHeight: 390,

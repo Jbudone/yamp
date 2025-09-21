@@ -5,7 +5,8 @@ import {
   varchar, 
   smallint, 
   json,
-  text
+  text,
+  boolean
 } from 'drizzle-orm/pg-core';
 
 export const songsTable = pgTable('songs', {
@@ -21,7 +22,8 @@ export const songsTable = pgTable('songs', {
     song_artist: varchar('song_artist', { length: 255 }),
     song_album: varchar('song_album', { length: 255 }),
     song_year: smallint('song_year'),
-    metadata: json('metadata')
+    metadata: json('metadata'),
+    hidden: boolean('hidden').notNull().default(0)
 });
 
 //export const usersTable = pgTable("users", {

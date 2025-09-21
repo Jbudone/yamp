@@ -5,8 +5,7 @@ TODO:
 - localstorage settings: table column sizing, sorts, last scrollTo position
 - show list sorting (which column is currently sorted)
 - space to pause/resume
-- only scroll to song row if not already in view
-- don't scroll to song if its just playing the next song
+- only scroll to song row if not already in view -- bottom or top whichever is closer
 - streamline adding new songs, building/uploading to CDN
 - fixup song conversion to use highest quality; replace songs in-place (replace content in CDN, find a way to flush indexedDB for song -- we'll need this later when we update songs by fetching better quality version externally)
 - Structure:
@@ -42,7 +41,6 @@ TODO:
 - build media files on the fly
 - compare banshee + database to make sure we're perfectly synced; maybe script it so we can detect any out of sync
 - drag/drop song into playlist to upload + add to queue; sync to local folder
-- indexDB mirror db; sync server->client db on load
 - playlist handling, reordering songs, drag/drop songs into playlist, etc.
 - in-playlist song wave insiration: https://www.bypeople.com/waveform-ui-js-component/  dotted waves
 - MusizBrainz
@@ -51,6 +49,8 @@ TODO:
 - sync from CDN -> PC? Or maybe we download to Backblaze inititally and then sync from there to PC
 - context menus
 - date_addeed and date_played don't lineup exactly with Banshee, why?
+- show yamp stats: indexedDB cache, library time
+- button to force nuke cache, library
 
 - indexDB store cached streamed songs (useful for flakey connection, or no connection yet) to save the last 20 songs; then dash.js intercept requests and fetch from indexDB instead
 
