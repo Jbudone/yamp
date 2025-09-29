@@ -118,7 +118,13 @@ class DBController {
             for (let i = 0; i < responseJson.length; ++i) {
                 const entry = responseJson[i];
                 updatedSongs.push(entry);
-                library.push(entry);
+
+                let existingEntryIdx = library.findIndex((e) => e.songId == entry.songId);
+                if (existingEntryIdx >= 0) {
+                    library[existingEntryIdx] = entry;
+                } else {
+                    library.push(entry);
+                }
             }
 
             // write updates
