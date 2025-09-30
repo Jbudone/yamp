@@ -13,7 +13,7 @@ onMount(async () => {
 
 
     const keydown = (e) => {
-        if (document.activeElement == document.body) {
+        if (e.key == " " && document.activeElement == document.body) {
             App.resumePauseToggle();
         }
     }
