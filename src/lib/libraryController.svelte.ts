@@ -34,7 +34,21 @@ class LibraryController {
             sortOrder: this.SORT_ASCEND
         };
 
-        await this.onLibraryUpdated();
+
+        // initial library load (only what's stored locally)
+        this.library = await DBController.getLocalLibrary();
+        this.setupLibrary();
+        this.filterView();
+        this.EE.emit('libraryUpdated');
+    }
+
+    async postInitialize() {
+        // sync library w/ cloud
+        this.library = await DBController.getLibrary();
+        this.setupLibrary();
+        this.filterView();
+
+        this.EE.emit('libraryUpdated');
     }
 
     private setupLibrary() {
@@ -134,9 +148,9 @@ class LibraryController {
     }
 
     async onLibraryUpdated() {
-        this.library = await DBController.getLibrary();
+        // Only fetch local library -- local change made already
+        this.library = await DBController.getLocalLibrary();
         this.setupLibrary();
-
         this.filterView();
 
         this.EE.emit('libraryUpdated');

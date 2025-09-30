@@ -84,6 +84,7 @@ class DBController {
 
                 cacheStore.transaction.oncomplete = onPendingFinished;
                 cacheMetaStore.transaction.oncomplete = onPendingFinished;
+                libraryStore.transaction.oncomplete = onPendingFinished;
             };
         }));
     }
@@ -313,11 +314,21 @@ class DBController {
 
     public async updateSongPlayed(songId) {
 
-        const response = await fetch(`/api/updateSongPlayed/${songId}`);
-        if (!response.ok) {
-            throw new Error('Server sync failed');
+
+        // Update song in local library
+        // NOTE: This will result in slightly different LastPlayed date than what's on server, but that will get resynced when we load up
+        let localLibrary = await this.getLocalLibrary();
+        for (let i = 0; i < localLibrary.length; ++i) {
+            let song = localLibrary[i];
+            if (song.cdnpath == songId) {
+                song.datePlayed = Math.floor((new Date()).getTime() / 1000);
+                song.playCount++;
+                await this.addSongs([song]);
+                break;
+            }
         }
 
+        fetch(`/api/updateSongPlayed/${songId}`);
         this.EE.emit('libraryUpdated');
     }
 }

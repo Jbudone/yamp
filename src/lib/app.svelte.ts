@@ -37,6 +37,9 @@ class App {
             appState.loading = false;
             appState.initialized = true;
 
+            // Post-initialize
+            await LibraryController.postInitialize();
+
             console.log('Application initialized successfully');
         } catch (error) {
             console.error('Failed to initialize application:', error);
