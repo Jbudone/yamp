@@ -2,6 +2,7 @@
 import App, { appState } from '$lib/app.svelte';
 import LibraryController from '$lib/libraryController.svelte';
 import PlayerController from '$lib/playerController.svelte.ts';
+import DBController from '$lib/dbController.svelte.ts';
 import { DateTime } from 'luxon';
 
 let onReady = $state(false);
@@ -29,6 +30,10 @@ const filterText = (e) => {
     LibraryController.filterText(text);
 };
 
+const clickedClearCache = (e) => {
+    DBController.clearCache();
+};
+
 const clearFilterText = (e) => {
     document.getElementById('libraryTextFilter').value = '';
     LibraryController.filterText("");
@@ -44,6 +49,9 @@ const clearFilterText = (e) => {
             <svg class="icon w-6 h-6 cursor-pointer"> <use href="icons.svg#icon-repeat"></use> </svg>
         </div>
     </div>
+<div id="controlsClearCache" on:click={clickedClearCache}>
+    <svg class="icon w-6 h-6 cursor-pointer"> <use href="icons.svg#icon-repeat"></use> </svg>
+</div>
 </div>
 </div>
 

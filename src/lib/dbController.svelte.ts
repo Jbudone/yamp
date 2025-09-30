@@ -89,6 +89,17 @@ class DBController {
         }));
     }
 
+    public async clearCache() {
+        console.log("clearing cache");
+
+        await this.db.close();
+        const request = indexedDB.deleteDatabase('yamp');
+        request.onsuccess = function() { console.log("Database deleted successfully"); };
+        request.onerror = function() { console.error("Error deleting database"); };
+        request.onblocked = function() { console.warn("Database deletion blocked, close all connections to the database"); };
+        location.reload();
+    }
+
     public async getLibrary() {
 
         let localLibrary = await this.getLocalLibrary();

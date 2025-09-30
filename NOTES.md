@@ -2,6 +2,7 @@ YAMP - Yet Another Music Player
 
 
 TODO:
+- background
 - localstorage settings: table column sizing, sorts, last scrollTo position
 - show list sorting (which column is currently sorted)
 - space to pause/resume
@@ -50,7 +51,6 @@ TODO:
 - context menus
 - date_addeed and date_played don't lineup exactly with Banshee, why?
 - show yamp stats: indexedDB cache, library time
-- button to force nuke cache, library
 
 - indexDB store cached streamed songs (useful for flakey connection, or no connection yet) to save the last 20 songs; then dash.js intercept requests and fetch from indexDB instead
 
