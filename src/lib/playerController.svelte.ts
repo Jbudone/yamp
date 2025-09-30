@@ -255,6 +255,14 @@ class PlayerController {
         this.EE.emit('playingSong', cdnPath);
     }
 
+    public async toggleResumePause() {
+        if (playerState.playing) {
+            this.pauseSong();
+        } else {
+            this.resumeSong();
+        }
+    }
+
     public async resumeSong() {
 
         if (playerState.activeSong == null) {

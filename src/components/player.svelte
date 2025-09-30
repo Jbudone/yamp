@@ -72,11 +72,7 @@ onMount(async () => {
 });
 
 const clickedPlayPause = (e) => {
-    if (playerState.playing) {
-        PlayerController.pauseSong();
-    } else {
-        PlayerController.resumeSong();
-    }
+    PlayerController.toggleResumePause();
 };
 
 const clickedLeft = (e) => {

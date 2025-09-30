@@ -56,6 +56,10 @@ class App {
         PlayerController.playSong(songRow.cdnpath);
     }
 
+    public async resumePauseToggle() {
+        PlayerController.toggleResumePause();
+    }
+
     private async onStartPlayingSong(cdnPath) {
         console.log(`App: onStartPlayingSong ${cdnPath}`);
 

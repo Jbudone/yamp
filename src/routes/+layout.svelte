@@ -12,7 +12,14 @@ onMount(async () => {
 });
 
 
+    const keydown = (e) => {
+        if (document.activeElement == document.body) {
+            App.resumePauseToggle();
+        }
+    }
 </script>
+
+<svelte:window on:keydown={keydown} />
 
 {#if appState.loading}
   <div class="loading-overlay">
