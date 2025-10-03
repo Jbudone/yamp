@@ -13,6 +13,7 @@ export const playerState = $state({
     playing: false,
     totalTime: 0,
     curTime: 0,
+    repeat: false,
 
     volume: 1
 });
@@ -306,9 +307,12 @@ class PlayerController {
             return;
         }
 
+        let nextSongId = playerState.activeSong;
+        if (!playerState.repeat) {
+            //let activeSongId = parseInt(playerState.activeSong.substr(playerState.activeSong.indexOf('_') + 1));
+            nextSongId = LibraryController.getNextSongAfter(playerState.activeSong);
+        }
 
-        //let activeSongId = parseInt(playerState.activeSong.substr(playerState.activeSong.indexOf('_') + 1));
-        let nextSongId = LibraryController.getNextSongAfter(playerState.activeSong);
         if (nextSongId != -1) {
             playerState.activeSong = nextSongId;// `song_${nextSongId}`;
             this.playSong(playerState.activeSong);
@@ -322,6 +326,10 @@ class PlayerController {
     public async setVolume(v) {
         this.player.setVolume(v);
         playerState.volume = v;
+    }
+
+    public async setRepeat(v) {
+        playerState.repeat = v;
     }
 
     private async onSongFinished() {

@@ -106,7 +106,7 @@ const clickedVolMute = (e) => {
 };
 
 const clickedRepeat = (e) => {
-
+    PlayerController.setRepeat(!playerState.repeat);
 };
 
 </script>
